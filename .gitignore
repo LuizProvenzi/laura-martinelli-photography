@@ -1,0 +1,12 @@
+# Camera originals. The site never loads these — index.html only ever points at
+# photos/web/ — and GitHub Pages serves everything in the repository, so
+# committing them would put full-resolution files up for public download.
+#
+# They stay on your machine. Keep a backup somewhere: without them
+# scripts/optimize.py has nothing to regenerate the web versions from.
+photos/originals/
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini

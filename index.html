@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laura Martinelli</title>
+<meta name="description" content="Laura Martinelli — fotógrafa de eventos, retratos e apresentações.">
+<meta name="theme-color" content="#0a0a0b">
+
+<!-- Tab icon: a camera drawn as vector paths rather than an emoji glyph. An
+     emoji sits wherever the reader's emoji font puts it, which is why it hung
+     low and could not be corrected reliably; these coordinates are centred in
+     the viewBox by construction. The lens is a hole punched with evenodd, so
+     the icon works on any tab colour, and the fill flips in dark mode. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cstyle%3Epath%7Bfill:%23111112%7D%40media%28prefers-color-scheme:dark%29%7Bpath%7Bfill:%23f2f0ec%7D%7D%3C/style%3E%3Cpath%20fill-rule='evenodd'%20d='M18,28%20h14%20l5,-10%20h26%20l5,10%20h14%20a8,8%200%200%201%208,8%20v38%20a8,8%200%200%201%20-8,8%20h-64%20a8,8%200%200%201%20-8,-8%20v-38%20a8,8%200%200%201%208,-8%20Z%20M63,55%20a13,13%200%201%201%20-26,0%20a13,13%200%201%201%2026,0%20Z'/%3E%3C/svg%3E">
+
+<meta property="og:title" content="Laura Martinelli">
+<meta property="og:image" content="photos/web/portrait.webp">
+<meta property="og:type" content="website">
+
+<style>
+  :root{
+    /* Warm off-white rather than #fff: the drop from the hero's black is long,
+       and pure white makes it a harder landing than it needs to be. */
+    --bg:#faf9f7;
+    --ink:#111112;
+
+    /* Sampled from the portrait itself, whose background sits at RGB 6-8.
+       Matching it lets the photo dissolve into the page instead of reading as
+       a black rectangle pasted onto white. */
+    --hero-bg:#0a0a0b;
+    --hero-ink:#f2f0ec;
+
+    --gap:10px;
+    --max-width:1240px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    /* A system font, so nothing is downloaded and the page has no external
+       requests at all. Times only ships regular and bold — no light weights. */
+    font-family:'Times New Roman',Times,serif;
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- HERO ----------
+     A 3:4 portrait cannot fill a widescreen the way a landscape hero does —
+     it would have to be cropped to a strip. So the viewport is split instead:
+     the photo keeps its own shape on one side, the name occupies the space
+     left over on the other. Nothing is cropped and nothing is upscaled.     */
+  .hero{
+    background:var(--hero-bg);
+    color:var(--hero-ink);
+    /* Barely-there lift at the top so the black reads as depth, not as ink. */
+    background-image:linear-gradient(to bottom,#111113 0%,var(--hero-bg) 55%);
+  }
+
+  .hero__inner{
+    max-width:var(--max-width);
+    margin:0 auto;
+    padding:clamp(2.5rem,8vh,5rem) clamp(1.25rem,3vw,1.5rem) clamp(3rem,9vh,5.5rem);
+    display:flex;
+    align-items:center;
+    gap:clamp(1.75rem,5vw,4.5rem);
+  }
+
+  .hero__name{
+    flex:1 1 auto;
+    min-width:0;
+    font-size:clamp(1.9rem,4.6vw,3.75rem);
+    font-weight:400;
+    line-height:1;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+  }
+  .hero__name span{display:block;font-weight:700}
+
+  /* Sized by width, not height: keeps the name's share of the row predictable
+     at every screen size. */
+  .hero__portrait{flex:0 0 clamp(240px,42%,520px)}
+  .hero__portrait img{display:block;width:100%;height:auto}
+
+  /* ---------- JUSTIFIED GALLERY ----------
+     No photo is ever cropped and no row is hardcoded.
+
+     Split of duties: the script decides how many photos go in each row for the
+     current viewport, then CSS does the arithmetic. Every tile's flex-grow is
+     its aspect ratio (width / height) with flex-basis: 0, so widths come out
+     proportional to each image's shape — which means every tile in a row lands
+     on exactly the same height and the row fills the width to the pixel.
+
+     Consequence: photos are never "smaller than the others". Within a row they
+     always match in height, at any screen size.                              */
+  .gallery{
+    max-width:var(--max-width);
+    margin:0 auto;
+    /* Breathing room between the dark band and the first photographs. */
+    padding:clamp(2.75rem,8vh,5rem) clamp(1.25rem,3vw,1.5rem) clamp(3rem,9vh,6rem);
+    display:flex;
+    flex-direction:column;
+    gap:var(--gap);
+  }
+
+  .row{display:flex;gap:var(--gap)}
+
+  /* Rows narrower than the page (a single column, or a short final row) sit
+     flush with the left margin. The gallery and the header share the same
+     padding, so this puts every photo's left edge on the same line as the
+     name above — centring them instead reads as drift, because there is
+     nothing else on the page centred for them to line up with. */
+  .row--flush{align-self:flex-start}
+
+  /* Before the script groups the tiles into rows (and if JS never runs),
+     each photo simply spans the full width. */
+  .gallery > .tile{width:100%}
+
+  .tile{
+    flex:var(--ratio) 1 0;
+    min-width:0;
+    cursor:zoom-in;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);
+  }
+  .tile.visible{opacity:1;transform:none}
+
+  .tile img{
+    display:block;
+    width:100%;
+    height:auto;          /* keeps the original aspect ratio */
+    transition:opacity .5s ease;
+  }
+  .tile:hover img{opacity:.82}
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    background:rgba(250,249,247,.985);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:4vh 5vw;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .35s ease;
+    cursor:zoom-out;
+  }
+  .lightbox.open{opacity:1;pointer-events:auto}
+  .lightbox img{width:auto;max-width:100%;max-height:92vh;object-fit:contain}
+
+  @media(max-width:720px){
+    :root{--gap:8px}
+    /* Not enough width for a split: name on top, portrait full width below. */
+    .hero__inner{
+      flex-direction:column;
+      align-items:stretch;
+      gap:clamp(1.5rem,4vh,2.25rem);
+    }
+    .hero__portrait{flex:0 0 auto}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important}
+    .tile{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero__inner">
+    <h1 class="hero__name">Laura<span>Martinelli</span></h1>
+    <figure class="hero__portrait">
+      <img src="photos/web/portrait.webp" width="1350" height="1800"
+           srcset="photos/web/portrait-sm.webp 675w, photos/web/portrait.webp 1350w"
+           sizes="(max-width:720px) 92vw, 42vw"
+           alt="Laura Martinelli" fetchpriority="high">
+    </figure>
+  </div>
+</header>
+
+<main class="gallery">
+
+    <figure class="tile" style="--ratio:.5617">
+      <img src="photos/web/IMG_2089.webp" width="1011" height="1800"
+           srcset="photos/web/IMG_2089-sm.webp 505w, photos/web/IMG_2089.webp 1011w"
+           sizes="(max-width:720px) 46vw, 24vw"
+           data-full="photos/web/IMG_2089.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.6261">
+      <img src="photos/web/IMG_2225.webp" width="1127" height="1800"
+           srcset="photos/web/IMG_2225-sm.webp 564w, photos/web/IMG_2225.webp 1127w"
+           sizes="(max-width:720px) 46vw, 26vw"
+           data-full="photos/web/IMG_2225.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.6100">
+      <img src="photos/web/IMG_2364.webp" width="1098" height="1800"
+           srcset="photos/web/IMG_2364-sm.webp 549w, photos/web/IMG_2364.webp 1098w"
+           sizes="(max-width:720px) 46vw, 26vw"
+           data-full="photos/web/IMG_2364.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.5611">
+      <img src="photos/web/IMG_1981.webp" width="1010" height="1800"
+           srcset="photos/web/IMG_1981-sm.webp 505w, photos/web/IMG_1981.webp 1010w"
+           sizes="(max-width:720px) 46vw, 24vw"
+           data-full="photos/web/IMG_1981.webp" alt="" loading="lazy">
+    </figure>
+
+    <figure class="tile" style="--ratio:.6667">
+      <img src="photos/web/IMG_0160.webp" width="1200" height="1800"
+           srcset="photos/web/IMG_0160-sm.webp 600w, photos/web/IMG_0160.webp 1200w"
+           sizes="(max-width:720px) 46vw, 32vw"
+           data-full="photos/web/IMG_0160.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.6667">
+      <img src="photos/web/IMG_0949.webp" width="1200" height="1800"
+           srcset="photos/web/IMG_0949-sm.webp 600w, photos/web/IMG_0949.webp 1200w"
+           sizes="(max-width:720px) 46vw, 32vw"
+           data-full="photos/web/IMG_0949.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.7589">
+      <img src="photos/web/IMG_2203.webp" width="1366" height="1800"
+           srcset="photos/web/IMG_2203-sm.webp 683w, photos/web/IMG_2203.webp 1366w"
+           sizes="(max-width:720px) 92vw, 36vw"
+           data-full="photos/web/IMG_2203.webp" alt="" loading="lazy">
+    </figure>
+
+</main>
+
+<div class="lightbox" id="lightbox"><img src="" alt=""></div>
+
+<script>
+  const gallery = document.querySelector('.gallery');
+  const tiles = Array.from(document.querySelectorAll('.tile'));
+
+  const ratioOf = (tile) => parseFloat(tile.style.getPropertyValue('--ratio'));
+  const gapSize = () => parseFloat(getComputedStyle(gallery).rowGap) || 10;
+
+  // Height a set of tiles would end up with if it became a full row.
+  function heightOf(row, width, gap) {
+    const sum = row.reduce((total, tile) => total + ratioOf(tile), 0);
+    return (width - gap * (row.length - 1)) / sum;
+  }
+
+  // No photo should get so narrow that it stops reading as a photograph.
+  const MIN_TILE_WIDTH = 240;
+  // A final row far taller than the one above it looks like a mistake; past
+  // this multiple it gets pinned to the previous row's height and centred.
+  const LAST_ROW_LIMIT = 1.35;
+
+  // One photo per row — the phone case. Stretching each to the full width would
+  // hand every photo a different height, because they are different shapes, and
+  // the column ends up looking ragged and unplanned. They get a single shared
+  // height instead and sit centred: same size down the page, widths free to
+  // follow each frame. The widest photo sets the height so none overflow.
+  const sharedHeightFor = (width) => width / Math.max(...tiles.map(ratioOf));
+
+  // Roughly how tall a row wants to be, tied to the viewport: a phone gets one
+  // photo at a time, a desktop gets a band of them.
+  const targetHeight = () =>
+    Math.max(300, Math.min(620, window.innerHeight * 0.55));
+
+  // Every way of splitting the photos into consecutive rows. Order is fixed, so
+  // the only choice is where to break — n photos give 2^(n-1) arrangements.
+  function arrangements(width, gap, target) {
+    const results = [];
+
+    for (let cuts = 0; cuts < (1 << (tiles.length - 1)); cuts++) {
+      const rows = [[tiles[0]]];
+      for (let i = 1; i < tiles.length; i++) {
+        if (cuts >> (i - 1) & 1) rows.push([]);
+        rows[rows.length - 1].push(tiles[i]);
+      }
+
+      // One photo per row gets rendered at a single shared height rather than
+      // stretched to the width (see layout()), so it has to be judged on that
+      // basis here too — otherwise the comparison uses heights this
+      // arrangement will never actually have.
+      const singleColumn = rows.every((row) => row.length === 1);
+      const heights = singleColumn
+        ? rows.map(() => sharedHeightFor(width))
+        : rows.map((row) => heightOf(row, width, gap));
+
+      // Pin an overshooting final row instead of letting it stretch.
+      const last = rows.length - 1;
+      const pinned = !singleColumn &&
+                     rows.length > 1 &&
+                     rows[last].length < rows[last - 1].length &&
+                     heights[last] > heights[last - 1] * LAST_ROW_LIMIT;
+      if (pinned) heights[last] = heights[last - 1];
+
+      const tallest = Math.max(...heights);
+      const shortest = Math.min(...heights);
+      const narrowest = Math.min(
+        ...rows.map((row, i) => heights[i] * Math.min(...row.map(ratioOf)))
+      );
+
+      // Four penalties, all in the same currency, so the best arrangement is
+      // simply the cheapest. No hard filters: a threshold that rules options
+      // out creates cliffs where one pixel of width flips the whole page.
+      const offTarget =
+        heights.reduce((sum, h) => sum + (h / target - 1) ** 2, 0) / heights.length;
+      const uneven = 2 * (tallest / shortest - 1) ** 2;
+      const tooSmall = narrowest < MIN_TILE_WIDTH
+        ? 3 * (MIN_TILE_WIDTH / narrowest - 1) ** 2
+        : 0;
+      const wasted = pinned ? 0.08 : 0;   // a pinned row leaves empty margins
+
+      results.push({
+        rows, heights, pinned,
+        cost: offTarget + uneven + tooSmall + wasted,
+      });
+    }
+
+    return results;
+  }
+
+  // Greedy fallback: 2^(n-1) stops being cheap once there are many photos.
+  function greedyRows(width, gap, target) {
+    const rows = [];
+    let current = [];
+    for (const tile of tiles) {
+      current.push(tile);
+      if (heightOf(current, width, gap) <= target) { rows.push(current); current = []; }
+    }
+    if (current.length) rows.push(current);
+    return rows.map((row) => ({ row, height: heightOf(row, width, gap) }));
+  }
+
+  function chooseLayout(width, gap) {
+    const target = targetHeight();
+
+    if (tiles.length > 16) {
+      const rows = greedyRows(width, gap, target);
+      return { rows: rows.map((r) => r.row), heights: rows.map((r) => r.height), pinned: false };
+    }
+
+    return arrangements(width, gap, target)
+      .reduce((best, a) => (a.cost < best.cost ? a : best));
+  }
+
+  function layout() {
+    const style = getComputedStyle(gallery);
+    const width = gallery.clientWidth
+      - parseFloat(style.paddingLeft)
+      - parseFloat(style.paddingRight);
+    const gap = gapSize();
+
+    const { rows, heights, pinned } = chooseLayout(width, gap);
+
+    const singleColumn = rows.every((row) => row.length === 1);
+    const sharedHeight = singleColumn ? sharedHeightFor(width) : 0;
+
+    const fragment = document.createDocumentFragment();
+
+    rows.forEach((row, index) => {
+      const element = document.createElement('div');
+      element.className = 'row';
+
+      if (singleColumn) {
+        element.style.width = (sharedHeight * ratioOf(row[0])) + 'px';
+        element.classList.add('row--flush');
+      } else if (pinned && index === rows.length - 1) {
+        const sum = row.reduce((total, tile) => total + ratioOf(tile), 0);
+        element.style.width = (heights[index] * sum + gap * (row.length - 1)) + 'px';
+        element.classList.add('row--flush');
+      }
+
+      row.forEach((tile) => element.appendChild(tile));
+      fragment.appendChild(element);
+    });
+
+    gallery.replaceChildren(fragment);
+  }
+
+  // Fade each tile in as it scrolls into view.
+  const revealer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
+
+  layout();
+  tiles.forEach((tile, i) => {
+    tile.style.transitionDelay = (i % 4) * 0.06 + 's';
+    revealer.observe(tile);
+  });
+
+  // Relayout on resize, but only when the width actually changed — mobile
+  // browsers fire resize constantly as the address bar hides and shows.
+  let lastWidth = window.innerWidth;
+  let pending;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    clearTimeout(pending);
+    pending = setTimeout(layout, 150);
+  });
+
+  // Click a photo to open it large.
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = lightbox.querySelector('img');
+
+  tiles.forEach((tile) => {
+    tile.addEventListener('click', () => {
+      lightboxImg.src = tile.querySelector('img').dataset.full;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  lightbox.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+
+</body>
+</html>
