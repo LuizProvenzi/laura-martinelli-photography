@@ -5,7 +5,7 @@ A single-page landing site for photographer Laura Martinelli.
 A portrait of her, her name, and seven photographs. Nothing else — no menu, no
 copy, no contact form. The work carries the page.
 
-**Live:** `https://USERNAME.github.io/laura-martinelli-photography/`
+**Live:** <https://luizprovenzi.github.io/laura-martinelli-photography/>
 
 ## The idea
 

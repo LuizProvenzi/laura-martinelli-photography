@@ -25,11 +25,15 @@
     --bg:#faf9f7;
     --ink:#111112;
 
-    /* Sampled from the portrait itself, whose background sits at RGB 6-8.
-       Matching it lets the photo dissolve into the page instead of reading as
-       a black rectangle pasted onto white. */
+    /* Deliberately darker than the portrait's own edge (which sits at RGB 35).
+       The photograph reads as a distinct object on the band rather than
+       dissolving into it — a frame, not a merge. */
     --hero-bg:#0a0a0b;
     --hero-ink:#f2f0ec;
+
+    /* Sans-serif counterpoint to the Times name. Also a system stack, so it
+       costs nothing to load. */
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
 
     --gap:10px;
     --max-width:1240px;
@@ -48,10 +52,10 @@
   }
 
   /* ---------- HERO ----------
-     A 3:4 portrait cannot fill a widescreen the way a landscape hero does —
-     it would have to be cropped to a strip. So the viewport is split instead:
-     the photo keeps its own shape on one side, the name occupies the space
-     left over on the other. Nothing is cropped and nothing is upscaled.     */
+     The portrait is roughly square, so it cannot fill a widescreen the way a
+     landscape hero does — it would have to be cropped to a strip. The viewport
+     is split instead: the photo keeps its own shape on one side, the name
+     occupies the space left over. Nothing is cropped, nothing is upscaled. */
   .hero{
     background:var(--hero-bg);
     color:var(--hero-ink);
@@ -68,9 +72,9 @@
     gap:clamp(1.75rem,5vw,4.5rem);
   }
 
+  .hero__intro{flex:1 1 auto;min-width:0}
+
   .hero__name{
-    flex:1 1 auto;
-    min-width:0;
     font-size:clamp(1.9rem,4.6vw,3.75rem);
     font-weight:400;
     line-height:1;
@@ -79,22 +83,53 @@
   }
   .hero__name span{display:block;font-weight:700}
 
+  /* Sans against the serif name, and roughly a twentieth of its size. The
+     tracking is what keeps a word this small from looking like a leftover:
+     spread out, it reads as a mark rather than as body text. */
+  .hero__craft{
+    margin-top:clamp(.9rem,2.2vh,1.35rem);
+    font-family:var(--sans);
+    font-size:clamp(.66rem,1vw,.76rem);
+    letter-spacing:.44em;
+    text-transform:uppercase;
+    color:#96918a;
+  }
+
+  .hero__social{
+    display:inline-flex;
+    align-items:center;
+    gap:.55em;
+    margin-top:clamp(1.4rem,3.5vh,2.1rem);
+    font-family:var(--sans);
+    font-size:clamp(.74rem,1.05vw,.83rem);
+    letter-spacing:.06em;
+    color:#b0aba4;
+    text-decoration:none;
+    transition:color .3s ease;
+  }
+  .hero__social:hover,
+  .hero__social:focus-visible{color:var(--hero-ink)}
+  .hero__social svg{
+    width:1.25em;
+    height:1.25em;
+    flex:none;          /* never let the glyph squash next to the text */
+  }
+
   /* Sized by width, not height: keeps the name's share of the row predictable
-     at every screen size. */
-  .hero__portrait{flex:0 0 clamp(240px,42%,520px)}
+     at every screen size. The portrait is near-square, so it needs a wider
+     share than a tall one would to carry the same visual weight. */
+  .hero__portrait{flex:0 0 clamp(240px,46%,560px)}
   .hero__portrait img{display:block;width:100%;height:auto}
 
   /* ---------- JUSTIFIED GALLERY ----------
-     No photo is ever cropped and no row is hardcoded.
+     Four photographs on the first row, three on the second, at every screen
+     size. On a phone the same arrangement simply scales down.
 
-     Split of duties: the script decides how many photos go in each row for the
-     current viewport, then CSS does the arithmetic. Every tile's flex-grow is
-     its aspect ratio (width / height) with flex-basis: 0, so widths come out
-     proportional to each image's shape — which means every tile in a row lands
-     on exactly the same height and the row fills the width to the pixel.
-
-     Consequence: photos are never "smaller than the others". Within a row they
-     always match in height, at any screen size.                              */
+     Each tile's flex-grow is its aspect ratio (width / height) with
+     flex-basis: 0, so widths come out proportional to each image's shape.
+     Two consequences fall out of that, and they hold at any width: every tile
+     in a row lands on exactly the same height, and the row fills the width to
+     the pixel. Nothing is cropped, and no media query touches the gallery. */
   .gallery{
     max-width:var(--max-width);
     margin:0 auto;
@@ -106,17 +141,6 @@
   }
 
   .row{display:flex;gap:var(--gap)}
-
-  /* Rows narrower than the page (a single column, or a short final row) sit
-     flush with the left margin. The gallery and the header share the same
-     padding, so this puts every photo's left edge on the same line as the
-     name above — centring them instead reads as drift, because there is
-     nothing else on the page centred for them to line up with. */
-  .row--flush{align-self:flex-start}
-
-  /* Before the script groups the tiles into rows (and if JS never runs),
-     each photo simply spans the full width. */
-  .gallery > .tile{width:100%}
 
   .tile{
     flex:var(--ratio) 1 0;
@@ -175,11 +199,27 @@
 
 <header class="hero">
   <div class="hero__inner">
-    <h1 class="hero__name">Laura<span>Martinelli</span></h1>
+    <div class="hero__intro">
+      <h1 class="hero__name">Laura<span>Martinelli</span></h1>
+      <p class="hero__craft">Fotografia</p>
+      <a class="hero__social" href="https://instagram.com/llmartinelli"
+         target="_blank" rel="noopener noreferrer">
+        <!-- Instagram mark drawn inline: keeps the page free of external
+             requests, and stroke="currentColor" makes it follow the link's
+             hover colour without a second rule. -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5.2"/>
+          <circle cx="12" cy="12" r="4.1"/>
+          <circle cx="17.3" cy="6.7" r="1.15" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>@llmartinelli</span>
+      </a>
+    </div>
     <figure class="hero__portrait">
-      <img src="photos/web/portrait.webp" width="1350" height="1800"
-           srcset="photos/web/portrait-sm.webp 675w, photos/web/portrait.webp 1350w"
-           sizes="(max-width:720px) 92vw, 42vw"
+      <img src="photos/web/portrait.webp" width="1737" height="1800"
+           srcset="photos/web/portrait-sm.webp 868w, photos/web/portrait.webp 1737w"
+           sizes="(max-width:720px) 92vw, 46vw"
            alt="Laura Martinelli" fetchpriority="high">
     </figure>
   </div>
@@ -187,197 +227,60 @@
 
 <main class="gallery">
 
+  <div class="row">
     <figure class="tile" style="--ratio:.5617">
       <img src="photos/web/IMG_2089.webp" width="1011" height="1800"
            srcset="photos/web/IMG_2089-sm.webp 505w, photos/web/IMG_2089.webp 1011w"
-           sizes="(max-width:720px) 46vw, 24vw"
+           sizes="24vw"
            data-full="photos/web/IMG_2089.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.6261">
       <img src="photos/web/IMG_2225.webp" width="1127" height="1800"
            srcset="photos/web/IMG_2225-sm.webp 564w, photos/web/IMG_2225.webp 1127w"
-           sizes="(max-width:720px) 46vw, 26vw"
+           sizes="26vw"
            data-full="photos/web/IMG_2225.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.6100">
       <img src="photos/web/IMG_2364.webp" width="1098" height="1800"
            srcset="photos/web/IMG_2364-sm.webp 549w, photos/web/IMG_2364.webp 1098w"
-           sizes="(max-width:720px) 46vw, 26vw"
+           sizes="26vw"
            data-full="photos/web/IMG_2364.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.5611">
       <img src="photos/web/IMG_1981.webp" width="1010" height="1800"
            srcset="photos/web/IMG_1981-sm.webp 505w, photos/web/IMG_1981.webp 1010w"
-           sizes="(max-width:720px) 46vw, 24vw"
+           sizes="24vw"
            data-full="photos/web/IMG_1981.webp" alt="" loading="lazy">
     </figure>
+  </div>
 
+  <div class="row">
     <figure class="tile" style="--ratio:.6667">
       <img src="photos/web/IMG_0160.webp" width="1200" height="1800"
            srcset="photos/web/IMG_0160-sm.webp 600w, photos/web/IMG_0160.webp 1200w"
-           sizes="(max-width:720px) 46vw, 32vw"
+           sizes="32vw"
            data-full="photos/web/IMG_0160.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.6667">
       <img src="photos/web/IMG_0949.webp" width="1200" height="1800"
            srcset="photos/web/IMG_0949-sm.webp 600w, photos/web/IMG_0949.webp 1200w"
-           sizes="(max-width:720px) 46vw, 32vw"
+           sizes="32vw"
            data-full="photos/web/IMG_0949.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.7589">
       <img src="photos/web/IMG_2203.webp" width="1366" height="1800"
            srcset="photos/web/IMG_2203-sm.webp 683w, photos/web/IMG_2203.webp 1366w"
-           sizes="(max-width:720px) 92vw, 36vw"
+           sizes="36vw"
            data-full="photos/web/IMG_2203.webp" alt="" loading="lazy">
     </figure>
+  </div>
 
 </main>
 
 <div class="lightbox" id="lightbox"><img src="" alt=""></div>
 
 <script>
-  const gallery = document.querySelector('.gallery');
   const tiles = Array.from(document.querySelectorAll('.tile'));
-
-  const ratioOf = (tile) => parseFloat(tile.style.getPropertyValue('--ratio'));
-  const gapSize = () => parseFloat(getComputedStyle(gallery).rowGap) || 10;
-
-  // Height a set of tiles would end up with if it became a full row.
-  function heightOf(row, width, gap) {
-    const sum = row.reduce((total, tile) => total + ratioOf(tile), 0);
-    return (width - gap * (row.length - 1)) / sum;
-  }
-
-  // No photo should get so narrow that it stops reading as a photograph.
-  const MIN_TILE_WIDTH = 240;
-  // A final row far taller than the one above it looks like a mistake; past
-  // this multiple it gets pinned to the previous row's height and centred.
-  const LAST_ROW_LIMIT = 1.35;
-
-  // One photo per row — the phone case. Stretching each to the full width would
-  // hand every photo a different height, because they are different shapes, and
-  // the column ends up looking ragged and unplanned. They get a single shared
-  // height instead and sit centred: same size down the page, widths free to
-  // follow each frame. The widest photo sets the height so none overflow.
-  const sharedHeightFor = (width) => width / Math.max(...tiles.map(ratioOf));
-
-  // Roughly how tall a row wants to be, tied to the viewport: a phone gets one
-  // photo at a time, a desktop gets a band of them.
-  const targetHeight = () =>
-    Math.max(300, Math.min(620, window.innerHeight * 0.55));
-
-  // Every way of splitting the photos into consecutive rows. Order is fixed, so
-  // the only choice is where to break — n photos give 2^(n-1) arrangements.
-  function arrangements(width, gap, target) {
-    const results = [];
-
-    for (let cuts = 0; cuts < (1 << (tiles.length - 1)); cuts++) {
-      const rows = [[tiles[0]]];
-      for (let i = 1; i < tiles.length; i++) {
-        if (cuts >> (i - 1) & 1) rows.push([]);
-        rows[rows.length - 1].push(tiles[i]);
-      }
-
-      // One photo per row gets rendered at a single shared height rather than
-      // stretched to the width (see layout()), so it has to be judged on that
-      // basis here too — otherwise the comparison uses heights this
-      // arrangement will never actually have.
-      const singleColumn = rows.every((row) => row.length === 1);
-      const heights = singleColumn
-        ? rows.map(() => sharedHeightFor(width))
-        : rows.map((row) => heightOf(row, width, gap));
-
-      // Pin an overshooting final row instead of letting it stretch.
-      const last = rows.length - 1;
-      const pinned = !singleColumn &&
-                     rows.length > 1 &&
-                     rows[last].length < rows[last - 1].length &&
-                     heights[last] > heights[last - 1] * LAST_ROW_LIMIT;
-      if (pinned) heights[last] = heights[last - 1];
-
-      const tallest = Math.max(...heights);
-      const shortest = Math.min(...heights);
-      const narrowest = Math.min(
-        ...rows.map((row, i) => heights[i] * Math.min(...row.map(ratioOf)))
-      );
-
-      // Four penalties, all in the same currency, so the best arrangement is
-      // simply the cheapest. No hard filters: a threshold that rules options
-      // out creates cliffs where one pixel of width flips the whole page.
-      const offTarget =
-        heights.reduce((sum, h) => sum + (h / target - 1) ** 2, 0) / heights.length;
-      const uneven = 2 * (tallest / shortest - 1) ** 2;
-      const tooSmall = narrowest < MIN_TILE_WIDTH
-        ? 3 * (MIN_TILE_WIDTH / narrowest - 1) ** 2
-        : 0;
-      const wasted = pinned ? 0.08 : 0;   // a pinned row leaves empty margins
-
-      results.push({
-        rows, heights, pinned,
-        cost: offTarget + uneven + tooSmall + wasted,
-      });
-    }
-
-    return results;
-  }
-
-  // Greedy fallback: 2^(n-1) stops being cheap once there are many photos.
-  function greedyRows(width, gap, target) {
-    const rows = [];
-    let current = [];
-    for (const tile of tiles) {
-      current.push(tile);
-      if (heightOf(current, width, gap) <= target) { rows.push(current); current = []; }
-    }
-    if (current.length) rows.push(current);
-    return rows.map((row) => ({ row, height: heightOf(row, width, gap) }));
-  }
-
-  function chooseLayout(width, gap) {
-    const target = targetHeight();
-
-    if (tiles.length > 16) {
-      const rows = greedyRows(width, gap, target);
-      return { rows: rows.map((r) => r.row), heights: rows.map((r) => r.height), pinned: false };
-    }
-
-    return arrangements(width, gap, target)
-      .reduce((best, a) => (a.cost < best.cost ? a : best));
-  }
-
-  function layout() {
-    const style = getComputedStyle(gallery);
-    const width = gallery.clientWidth
-      - parseFloat(style.paddingLeft)
-      - parseFloat(style.paddingRight);
-    const gap = gapSize();
-
-    const { rows, heights, pinned } = chooseLayout(width, gap);
-
-    const singleColumn = rows.every((row) => row.length === 1);
-    const sharedHeight = singleColumn ? sharedHeightFor(width) : 0;
-
-    const fragment = document.createDocumentFragment();
-
-    rows.forEach((row, index) => {
-      const element = document.createElement('div');
-      element.className = 'row';
-
-      if (singleColumn) {
-        element.style.width = (sharedHeight * ratioOf(row[0])) + 'px';
-        element.classList.add('row--flush');
-      } else if (pinned && index === rows.length - 1) {
-        const sum = row.reduce((total, tile) => total + ratioOf(tile), 0);
-        element.style.width = (heights[index] * sum + gap * (row.length - 1)) + 'px';
-        element.classList.add('row--flush');
-      }
-
-      row.forEach((tile) => element.appendChild(tile));
-      fragment.appendChild(element);
-    });
-
-    gallery.replaceChildren(fragment);
-  }
 
   // Fade each tile in as it scrolls into view.
   const revealer = new IntersectionObserver((entries) => {
@@ -389,21 +292,9 @@
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
 
-  layout();
   tiles.forEach((tile, i) => {
     tile.style.transitionDelay = (i % 4) * 0.06 + 's';
     revealer.observe(tile);
-  });
-
-  // Relayout on resize, but only when the width actually changed — mobile
-  // browsers fire resize constantly as the address bar hides and shows.
-  let lastWidth = window.innerWidth;
-  let pending;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === lastWidth) return;
-    lastWidth = window.innerWidth;
-    clearTimeout(pending);
-    pending = setTimeout(layout, 150);
   });
 
   // Click a photo to open it large.
