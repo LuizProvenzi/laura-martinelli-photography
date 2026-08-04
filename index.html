@@ -122,8 +122,8 @@
   .hero__portrait img{display:block;width:100%;height:auto}
 
   /* ---------- JUSTIFIED GALLERY ----------
-     Four photographs on the first row, three on the second, at every screen
-     size. On a phone the same arrangement simply scales down.
+     Three photographs per row, three rows, at every screen size. On a phone
+     the same arrangement simply scales down.
 
      Each tile's flex-grow is its aspect ratio (width / height) with
      flex-basis: 0, so widths come out proportional to each image's shape.
@@ -227,50 +227,71 @@
 
 <main class="gallery">
 
+  <!-- The three rows carry near-identical ratio sums (1.85 / 1.84 / 1.99), so
+       they resolve to near-identical heights: the grid reads as a grid rather
+       than as three rows that happen to sit above one another. Each tile's
+       sizes value is its share of its own row, which is why they add to 100vw
+       within a row and differ between rows. -->
+
   <div class="row">
     <figure class="tile" style="--ratio:.5617">
       <img src="photos/web/IMG_2089.webp" width="1011" height="1800"
            srcset="photos/web/IMG_2089-sm.webp 505w, photos/web/IMG_2089.webp 1011w"
-           sizes="24vw"
+           sizes="30vw"
            data-full="photos/web/IMG_2089.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.6261">
       <img src="photos/web/IMG_2225.webp" width="1127" height="1800"
            srcset="photos/web/IMG_2225-sm.webp 564w, photos/web/IMG_2225.webp 1127w"
-           sizes="26vw"
+           sizes="34vw"
            data-full="photos/web/IMG_2225.webp" alt="" loading="lazy">
     </figure>
-    <figure class="tile" style="--ratio:.6100">
-      <img src="photos/web/IMG_2364.webp" width="1098" height="1800"
-           srcset="photos/web/IMG_2364-sm.webp 549w, photos/web/IMG_2364.webp 1098w"
-           sizes="26vw"
-           data-full="photos/web/IMG_2364.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.5611">
-      <img src="photos/web/IMG_1981.webp" width="1010" height="1800"
-           srcset="photos/web/IMG_1981-sm.webp 505w, photos/web/IMG_1981.webp 1010w"
-           sizes="24vw"
-           data-full="photos/web/IMG_1981.webp" alt="" loading="lazy">
+    <figure class="tile" style="--ratio:.6667">
+      <img src="photos/web/IMG_5172.webp" width="1200" height="1800"
+           srcset="photos/web/IMG_5172-sm.webp 600w, photos/web/IMG_5172.webp 1200w"
+           sizes="36vw"
+           data-full="photos/web/IMG_5172.webp" alt="" loading="lazy">
     </figure>
   </div>
 
   <div class="row">
+    <figure class="tile" style="--ratio:.6100">
+      <img src="photos/web/IMG_2364.webp" width="1098" height="1800"
+           srcset="photos/web/IMG_2364-sm.webp 549w, photos/web/IMG_2364.webp 1098w"
+           sizes="33vw"
+           data-full="photos/web/IMG_2364.webp" alt="" loading="lazy">
+    </figure>
     <figure class="tile" style="--ratio:.6667">
       <img src="photos/web/IMG_0160.webp" width="1200" height="1800"
            srcset="photos/web/IMG_0160-sm.webp 600w, photos/web/IMG_0160.webp 1200w"
-           sizes="32vw"
+           sizes="36vw"
            data-full="photos/web/IMG_0160.webp" alt="" loading="lazy">
+    </figure>
+    <figure class="tile" style="--ratio:.5622">
+      <img src="photos/web/IMG_5127.webp" width="1012" height="1800"
+           srcset="photos/web/IMG_5127-sm.webp 506w, photos/web/IMG_5127.webp 1012w"
+           sizes="31vw"
+           data-full="photos/web/IMG_5127.webp" alt="" loading="lazy">
+    </figure>
+  </div>
+
+  <div class="row">
+    <figure class="tile" style="--ratio:.5611">
+      <img src="photos/web/IMG_1981.webp" width="1010" height="1800"
+           srcset="photos/web/IMG_1981-sm.webp 505w, photos/web/IMG_1981.webp 1010w"
+           sizes="28vw"
+           data-full="photos/web/IMG_1981.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.6667">
       <img src="photos/web/IMG_0949.webp" width="1200" height="1800"
            srcset="photos/web/IMG_0949-sm.webp 600w, photos/web/IMG_0949.webp 1200w"
-           sizes="32vw"
+           sizes="34vw"
            data-full="photos/web/IMG_0949.webp" alt="" loading="lazy">
     </figure>
     <figure class="tile" style="--ratio:.7589">
       <img src="photos/web/IMG_2203.webp" width="1366" height="1800"
            srcset="photos/web/IMG_2203-sm.webp 683w, photos/web/IMG_2203.webp 1366w"
-           sizes="36vw"
+           sizes="38vw"
            data-full="photos/web/IMG_2203.webp" alt="" loading="lazy">
     </figure>
   </div>
@@ -293,7 +314,9 @@
   }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
 
   tiles.forEach((tile, i) => {
-    tile.style.transitionDelay = (i % 4) * 0.06 + 's';
+    // Stagger within the row, not across the whole gallery: three per row, so
+    // the delay resets on every row and each one fades in left to right.
+    tile.style.transitionDelay = (i % 3) * 0.06 + 's';
     revealer.observe(tile);
   });
 
