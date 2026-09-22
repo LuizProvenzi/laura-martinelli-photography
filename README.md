@@ -2,7 +2,7 @@
 
 A single-page landing site for photographer Laura Martinelli.
 
-A portrait of her, her name, and seven photographs. Nothing else — no menu, no
+A portrait of her, her name, and twenty-one photographs. Nothing else — no menu, no
 copy, no contact form. The work carries the page.
 
 **Live:** <https://luizprovenzi.github.io/laura-martinelli-photography/>
@@ -20,24 +20,16 @@ cut out and pasted down. Matching the surround lets it dissolve into the page.
 The gallery below returns to a warm off-white — not pure white, which makes the
 drop from black a harder landing than it needs to be.
 
-The gallery itself is justified, the way a printed contact sheet reads. Photos keep their
-original proportions and are never cropped; each row scales to fill the page
-width, so images sitting side by side always match in height. Click any one to
-open it large.
-
-Rows are not fixed. For the viewport at hand the page works out how many photos
-belong on each line — four across on a desktop, two on a tablet, one at a time
-on a phone — favouring the largest photos that still fit the screen without any
-of them turning into a thumbnail.
-
-Once it comes down to a single column the rule inverts: rather than stretch every
-frame to the full width, which would leave each one a different height, they all
-share one height. Same size down the page, widths free to follow the shape of
-each photograph, every left edge flush with the name in the header.
+The gallery is a fixed editorial grid, sketched by hand first: rows of three,
+broken by a full-width banner (photo 7) and a wide pair (17 and 18). Every tile
+in a row shares one shape, so each row lands on a single height; photos fill
+their frames and are cropped to fit, with a focal point chosen per photo so the
+subject survives. Click any one to open it large and uncropped. The same grid
+scales down on a phone rather than being rearranged.
 
 Plain HTML, CSS and JavaScript in a single file. No framework, no build step,
-no dependencies. The whole page weighs about 1.4 MB — down from 40 MB of
-camera originals.
+no dependencies. Photos load lazily, as small WebP variants on phones (about 1 MB for all
+twenty-one) and larger ones on wide screens.
 
 ## Structure
 
@@ -62,12 +54,17 @@ pip install pillow
 python scripts/optimize.py
 ```
 
-The script resizes, converts to WebP, fixes EXIF rotation, and prints each
-image's `--ratio`. Copy that value into the matching `<figure class="tile">` in
-`index.html`, along with the new filenames.
+The script resizes, converts to WebP and fixes EXIF rotation. Photos are named
+by position (`1.jpg` … `21.jpg`), so replacing one in `originals/` and re-running
+is all it takes.
 
-That is the whole edit — photos are a flat list, so adding or removing one needs
-no layout changes. Rows are recalculated on the fly.
+Each `<figure class="tile">` in `index.html` carries two values:
+
+- `--shape` — the row's width / height; keep it the same for every tile in a row.
+- `--pos` — which part of the photo survives the crop (`50% 50%` is centre,
+  `50% 80%` keeps the lower part). Omit it to centre.
+
+`tile--full` spans the whole row, `tile--half` takes half of it.
 
 ## Deploying
 

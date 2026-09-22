@@ -121,41 +121,48 @@
   .hero__portrait{flex:0 0 clamp(240px,46%,560px)}
   .hero__portrait img{display:block;width:100%;height:auto}
 
-  /* ---------- JUSTIFIED GALLERY ----------
-     Three photographs per row, three rows, at every screen size. On a phone
-     the same arrangement simply scales down.
+  /* ---------- GALLERY GRID ----------
+     A fixed editorial grid, drawn by hand first: six columns, where a normal
+     tile takes two (three across), a wide pair takes three each, and the
+     banner takes all six. The sequence of rows is:
 
-     Each tile's flex-grow is its aspect ratio (width / height) with
-     flex-basis: 0, so widths come out proportional to each image's shape.
-     Two consequences fall out of that, and they hold at any width: every tile
-     in a row lands on exactly the same height, and the row fills the width to
-     the pixel. Nothing is cropped, and no media query touches the gallery. */
+        1 2 3  |  4 5 6  |  7 (banner)  |  8 9 10  |  11 12 13
+        14 15 16  |  17 18 (wide pair)  |  19 20 21
+
+     Every tile in a row shares one --shape (width / height), so a row always
+     lands on a single height. Photos fill their frame with object-fit: cover;
+     --pos picks which part of each photograph survives the crop. The lightbox
+     always shows the full, uncropped image. The same grid scales down to the
+     phone — no media query rearranges it. */
   .gallery{
     max-width:var(--max-width);
     margin:0 auto;
     /* Breathing room between the dark band and the first photographs. */
     padding:clamp(2.75rem,8vh,5rem) clamp(1.25rem,3vw,1.5rem) clamp(3rem,9vh,6rem);
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
     gap:var(--gap);
   }
 
-  .row{display:flex;gap:var(--gap)}
-
   .tile{
-    flex:var(--ratio) 1 0;
-    min-width:0;
+    grid-column:span 2;
+    aspect-ratio:var(--shape);
+    overflow:hidden;
     cursor:zoom-in;
     opacity:0;
     transform:translateY(14px);
     transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);
   }
+  .tile--half{grid-column:span 3}
+  .tile--full{grid-column:1 / -1}
   .tile.visible{opacity:1;transform:none}
 
   .tile img{
     display:block;
     width:100%;
-    height:auto;          /* keeps the original aspect ratio */
+    height:100%;
+    object-fit:cover;
+    object-position:var(--pos,50% 50%);
     transition:opacity .5s ease;
   }
   .tile:hover img{opacity:.82}
@@ -227,74 +234,147 @@
 
 <main class="gallery">
 
-  <!-- The three rows carry near-identical ratio sums (1.85 / 1.84 / 1.99), so
-       they resolve to near-identical heights: the grid reads as a grid rather
-       than as three rows that happen to sit above one another. Each tile's
-       sizes value is its share of its own row, which is why they add to 100vw
-       within a row and differ between rows. -->
+  <!-- 1 2 3 -->
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/1.webp" width="1089" height="1800"
+         srcset="photos/web/1-sm.webp 544w, photos/web/1.webp 1089w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/1.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/2.webp" width="1011" height="1800"
+         srcset="photos/web/2-sm.webp 505w, photos/web/2.webp 1011w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/2.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/3.webp" width="1150" height="1800"
+         srcset="photos/web/3-sm.webp 575w, photos/web/3.webp 1150w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/3.webp" alt="" loading="lazy">
+  </figure>
 
-  <div class="row">
-    <figure class="tile" style="--ratio:.5617">
-      <img src="photos/web/IMG_2089.webp" width="1011" height="1800"
-           srcset="photos/web/IMG_2089-sm.webp 505w, photos/web/IMG_2089.webp 1011w"
-           sizes="30vw"
-           data-full="photos/web/IMG_2089.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.6261">
-      <img src="photos/web/IMG_2225.webp" width="1127" height="1800"
-           srcset="photos/web/IMG_2225-sm.webp 564w, photos/web/IMG_2225.webp 1127w"
-           sizes="34vw"
-           data-full="photos/web/IMG_2225.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.6667">
-      <img src="photos/web/IMG_5172.webp" width="1200" height="1800"
-           srcset="photos/web/IMG_5172-sm.webp 600w, photos/web/IMG_5172.webp 1200w"
-           sizes="36vw"
-           data-full="photos/web/IMG_5172.webp" alt="" loading="lazy">
-    </figure>
-  </div>
+  <!-- 4 5 6 -->
+  <figure class="tile" style="--shape:0.85">
+    <img src="photos/web/4.webp" width="1464" height="1800"
+         srcset="photos/web/4-sm.webp 732w, photos/web/4.webp 1464w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/4.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.85">
+    <img src="photos/web/5.webp" width="1367" height="1800"
+         srcset="photos/web/5-sm.webp 683w, photos/web/5.webp 1367w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/5.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.85;--pos:50% 60%">
+    <img src="photos/web/6.webp" width="1200" height="1800"
+         srcset="photos/web/6-sm.webp 600w, photos/web/6.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/6.webp" alt="" loading="lazy">
+  </figure>
 
-  <div class="row">
-    <figure class="tile" style="--ratio:.6100">
-      <img src="photos/web/IMG_2364.webp" width="1098" height="1800"
-           srcset="photos/web/IMG_2364-sm.webp 549w, photos/web/IMG_2364.webp 1098w"
-           sizes="33vw"
-           data-full="photos/web/IMG_2364.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.6667">
-      <img src="photos/web/IMG_0160.webp" width="1200" height="1800"
-           srcset="photos/web/IMG_0160-sm.webp 600w, photos/web/IMG_0160.webp 1200w"
-           sizes="36vw"
-           data-full="photos/web/IMG_0160.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.5622">
-      <img src="photos/web/IMG_5127.webp" width="1012" height="1800"
-           srcset="photos/web/IMG_5127-sm.webp 506w, photos/web/IMG_5127.webp 1012w"
-           sizes="31vw"
-           data-full="photos/web/IMG_5127.webp" alt="" loading="lazy">
-    </figure>
-  </div>
+  <!-- 7 — banner -->
+  <figure class="tile tile--full" style="--shape:2;--pos:50% 72%">
+    <img src="photos/web/7.webp" width="1800" height="1564"
+         srcset="photos/web/7-sm.webp 900w, photos/web/7.webp 1800w"
+         sizes="(max-width:1240px) 100vw, 1240px"
+         data-full="photos/web/7.webp" alt="" loading="lazy">
+  </figure>
 
-  <div class="row">
-    <figure class="tile" style="--ratio:.5611">
-      <img src="photos/web/IMG_1981.webp" width="1010" height="1800"
-           srcset="photos/web/IMG_1981-sm.webp 505w, photos/web/IMG_1981.webp 1010w"
-           sizes="28vw"
-           data-full="photos/web/IMG_1981.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.6667">
-      <img src="photos/web/IMG_0949.webp" width="1200" height="1800"
-           srcset="photos/web/IMG_0949-sm.webp 600w, photos/web/IMG_0949.webp 1200w"
-           sizes="34vw"
-           data-full="photos/web/IMG_0949.webp" alt="" loading="lazy">
-    </figure>
-    <figure class="tile" style="--ratio:.7589">
-      <img src="photos/web/IMG_2203.webp" width="1366" height="1800"
-           srcset="photos/web/IMG_2203-sm.webp 683w, photos/web/IMG_2203.webp 1366w"
-           sizes="38vw"
-           data-full="photos/web/IMG_2203.webp" alt="" loading="lazy">
-    </figure>
-  </div>
+  <!-- 8 9 10 -->
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/8.webp" width="1012" height="1800"
+         srcset="photos/web/8-sm.webp 506w, photos/web/8.webp 1012w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/8.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/9.webp" width="1013" height="1800"
+         srcset="photos/web/9-sm.webp 506w, photos/web/9.webp 1013w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/9.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.6">
+    <img src="photos/web/10.webp" width="1085" height="1800"
+         srcset="photos/web/10-sm.webp 542w, photos/web/10.webp 1085w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/10.webp" alt="" loading="lazy">
+  </figure>
+
+  <!-- 11 12 13 -->
+  <figure class="tile" style="--shape:0.72;--pos:50% 75%">
+    <img src="photos/web/11.webp" width="1012" height="1800"
+         srcset="photos/web/11-sm.webp 506w, photos/web/11.webp 1012w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/11.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.72;--pos:50% 80%">
+    <img src="photos/web/12.webp" width="1012" height="1800"
+         srcset="photos/web/12-sm.webp 506w, photos/web/12.webp 1012w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/12.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.72;--pos:50% 70%">
+    <img src="photos/web/13.webp" width="1012" height="1800"
+         srcset="photos/web/13-sm.webp 506w, photos/web/13.webp 1012w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/13.webp" alt="" loading="lazy">
+  </figure>
+
+  <!-- 14 15 16 -->
+  <figure class="tile" style="--shape:0.8;--pos:50% 70%">
+    <img src="photos/web/14.webp" width="1200" height="1800"
+         srcset="photos/web/14-sm.webp 600w, photos/web/14.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/14.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.8;--pos:50% 70%">
+    <img src="photos/web/15.webp" width="1200" height="1800"
+         srcset="photos/web/15-sm.webp 600w, photos/web/15.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/15.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.8;--pos:50% 45%">
+    <img src="photos/web/16.webp" width="1200" height="1800"
+         srcset="photos/web/16-sm.webp 600w, photos/web/16.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/16.webp" alt="" loading="lazy">
+  </figure>
+
+  <!-- 17 18 — wide pair -->
+  <figure class="tile tile--half" style="--shape:1.3;--pos:50% 15%">
+    <img src="photos/web/17.webp" width="1350" height="1800"
+         srcset="photos/web/17-sm.webp 675w, photos/web/17.webp 1350w"
+         sizes="(max-width:1240px) 50vw, 615px"
+         data-full="photos/web/17.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile tile--half" style="--shape:1.3;--pos:50% 55%">
+    <img src="photos/web/18.webp" width="1080" height="1800"
+         srcset="photos/web/18-sm.webp 540w, photos/web/18.webp 1080w"
+         sizes="(max-width:1240px) 50vw, 615px"
+         data-full="photos/web/18.webp" alt="" loading="lazy">
+  </figure>
+
+  <!-- 19 20 21 -->
+  <figure class="tile" style="--shape:0.7;--pos:50% 80%">
+    <img src="photos/web/19.webp" width="1200" height="1800"
+         srcset="photos/web/19-sm.webp 600w, photos/web/19.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/19.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.7;--pos:50% 70%">
+    <img src="photos/web/20.webp" width="1161" height="1800"
+         srcset="photos/web/20-sm.webp 581w, photos/web/20.webp 1161w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/20.webp" alt="" loading="lazy">
+  </figure>
+  <figure class="tile" style="--shape:0.7;--pos:50% 70%">
+    <img src="photos/web/21.webp" width="1200" height="1800"
+         srcset="photos/web/21-sm.webp 600w, photos/web/21.webp 1200w"
+         sizes="(max-width:1240px) 33vw, 410px"
+         data-full="photos/web/21.webp" alt="" loading="lazy">
+  </figure>
 
 </main>
 
@@ -313,10 +393,15 @@
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
 
-  tiles.forEach((tile, i) => {
-    // Stagger within the row, not across the whole gallery: three per row, so
-    // the delay resets on every row and each one fades in left to right.
-    tile.style.transitionDelay = (i % 3) * 0.06 + 's';
+  // Stagger within each row, not across the whole gallery, so every row fades
+  // in left to right. Rows are read from the layout itself (tiles sharing a
+  // top edge), so the grid can change without touching this.
+  let rowTop = null, col = 0;
+  tiles.forEach((tile) => {
+    const top = tile.offsetTop;
+    col = top === rowTop ? col + 1 : 0;
+    rowTop = top;
+    tile.style.transitionDelay = col * 0.06 + 's';
     revealer.observe(tile);
   });
 
